@@ -73,6 +73,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 509382a0f0f156d458cc2c134354985a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Mannan.Runtime::Mannan.Player.PlayerInputReader
+  actionsAsset: {fileID: -944628639613478452, guid: a617698da3fa2e14eaa37dfa154f1614, type: 3}
 --- !u!114 &100005
 MonoBehaviour:
   m_ObjectHideFlags: 0

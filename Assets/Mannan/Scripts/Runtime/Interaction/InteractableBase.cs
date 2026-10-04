@@ -24,17 +24,52 @@ namespace Mannan.Interaction
         [Tooltip("If false, player cannot interact with this object currently.")]
         [SerializeField] private bool isInteractable = true;
 
+        [Header("Anchors")]
+        [Tooltip("Optional authored anchor where the world-space prompt should appear. If null, calculates from bounds.")]
+        [SerializeField] private Transform interactionAnchor;
+
+        [Tooltip("Additional vertical clearance offset in meters to ensure the prompt floats clearly above the object.")]
+        [SerializeField] private float promptVerticalOffset = 0.25f;
+
         [Header("Presentation Hooks")]
         [SerializeField] private UnityEvent onFocused;
         [SerializeField] private UnityEvent onUnfocused;
         [SerializeField] private UnityEvent<GameObject> onInteracted;
 
+        public event Action OnFocusedEvent;
+        public event Action OnUnfocusedEvent;
         public event Action<GameObject> OnInteractedEvent;
 
         public string PromptText => promptText;
         public string ActionName => actionName;
         public Transform Transform => transform;
+        public Transform InteractionAnchor => interactionAnchor;
+        public float PromptVerticalOffset { get => promptVerticalOffset; set => promptVerticalOffset = value; }
         public bool IsInteractable { get => isInteractable; set => isInteractable = value; }
+
+        /// <summary>
+        /// Returns the world position where the interaction prompt should attach.
+        /// Uses the interactionAnchor if assigned; otherwise calculates a sensible fallback from bounds.
+        /// </summary>
+        public virtual Vector3 GetPromptWorldPosition()
+        {
+            if (interactionAnchor != null)
+            {
+                return interactionAnchor.position + Vector3.up * promptVerticalOffset;
+            }
+
+            if (TryGetComponent<Collider>(out var col))
+            {
+                return col.bounds.center + Vector3.up * (col.bounds.extents.y + promptVerticalOffset);
+            }
+
+            if (TryGetComponent<Renderer>(out var rend))
+            {
+                return rend.bounds.center + Vector3.up * (rend.bounds.extents.y + promptVerticalOffset);
+            }
+
+            return transform.position + Vector3.up * (1.0f + promptVerticalOffset);
+        }
 
         public virtual bool CanInteract(GameObject interactor)
         {
@@ -44,11 +79,13 @@ namespace Mannan.Interaction
         public virtual void OnFocusEnter(GameObject interactor)
         {
             onFocused?.Invoke();
+            OnFocusedEvent?.Invoke();
         }
 
         public virtual void OnFocusExit(GameObject interactor)
         {
             onUnfocused?.Invoke();
+            OnUnfocusedEvent?.Invoke();
         }
 
         public virtual void Interact(GameObject interactor)

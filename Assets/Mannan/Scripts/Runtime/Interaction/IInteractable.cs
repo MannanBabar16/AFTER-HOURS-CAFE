@@ -16,6 +16,9 @@ namespace Mannan.Interaction
         string PromptText { get; }
         string ActionName { get; }
         Transform Transform { get; }
+        Transform InteractionAnchor { get; }
+
+        Vector3 GetPromptWorldPosition();
 
         bool CanInteract(GameObject interactor);
         void OnFocusEnter(GameObject interactor);

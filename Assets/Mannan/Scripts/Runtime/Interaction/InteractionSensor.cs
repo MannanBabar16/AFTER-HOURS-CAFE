@@ -38,6 +38,7 @@ namespace Mannan.Interaction
 
         public IInteractable CurrentFocus { get; private set; }
         public float DetectionRadius => detectionRadius;
+        public PlayerInputReader InputReader => inputReader;
 
         private readonly Collider[] _overlapBuffer = new Collider[16];
         private readonly List<IInteractable> _candidateCache = new List<IInteractable>(8);

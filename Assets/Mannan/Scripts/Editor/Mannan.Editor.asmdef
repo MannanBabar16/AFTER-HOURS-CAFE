@@ -3,6 +3,7 @@
     "rootNamespace": "Mannan.Editor",
     "references": [
         "Mannan.Runtime",
+        "Unity.InputSystem",
         "Unity.TextMeshPro",
         "Unity.TextMeshPro.Editor",
         "UnityEngine.UI",
