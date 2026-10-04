@@ -10,12 +10,13 @@ GameObject:
   m_Component:
   - component: {fileID: 100002}
   - component: {fileID: 100003}
+  - component: {fileID: 4542135062917670890}
   - component: {fileID: 100004}
   - component: {fileID: 100005}
   - component: {fileID: 100006}
   m_Layer: 0
   m_Name: Player_Prototype
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -61,6 +62,21 @@ CharacterController:
   m_SkinWidth: 0.06
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.9, z: 0}
+--- !u!114 &4542135062917670890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d12a67e0081d454fa16b0b23f2b98e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mannan.Runtime::Mannan.Player.ActiveControlSchemeTracker
+  stickDeadzone: 0.2
+  triggerDeadzone: 0.2
+  mouseDeltaThreshold: 3
 --- !u!114 &100004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,6 +90,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Mannan.Runtime::Mannan.Player.PlayerInputReader
   actionsAsset: {fileID: -944628639613478452, guid: a617698da3fa2e14eaa37dfa154f1614, type: 3}
+  schemeTracker: {fileID: 4542135062917670890}
 --- !u!114 &100005
 MonoBehaviour:
   m_ObjectHideFlags: 0
