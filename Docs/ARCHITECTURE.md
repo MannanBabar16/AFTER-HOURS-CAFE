@@ -122,16 +122,25 @@ Examples of legitimate long-lived systems:
 - content/definition registry if needed.
 
 ## 8. Core System Families
-
-### Interaction
-Generic first-person interaction contract:
-- focus/eligibility,
-- prompt,
-- interact,
-- hold/progress when required,
-- hand/carried-object compatibility.
-
-Keep it generic enough for coffee tools, trays, cleaning, doors, phones, etc., without making it a universal action framework.
+ 
++### Camera & View Philosophy
++The game uses a **3/4 isometric-inspired perspective camera** for main gameplay.
++- Direct camera-relative WASD control of visible character.
++- Perspective projection with mild perspective distortion, distant/narrow perspective to retain a cozy playable diorama feel.
++- Smooth player following (damped, indoor-friendly, readable around furniture).
++- Contextual close-up workstation cameras for detailed, tactile stations (e.g. coffee preparation).
++- Higher decoration camera and optional photo mode planned for later milestones.
++- Strict non-goals: no first-person gameplay, no over-the-shoulder gameplay, no unrestricted camera-mode switching.
++
++### Interaction
++Generic proximity/facing interaction contract suited for elevated 3/4 diorama view:
++- proximity and facing angle focus resolution (non-alloc physics overlap scoring),
++- prompt presentation hook (uGUI + TextMeshPro + DOTween Pro),
++- interact execution,
++- hold/progress when required,
++- hand/carried-object compatibility.
++
++Keep it generic enough for coffee machines, cups, trays, tables, doors, cleaning, phones, robots, etc., without making it a universal action framework.
 
 ### Coffee
 Owns:

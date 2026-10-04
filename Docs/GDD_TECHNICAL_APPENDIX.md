@@ -29,7 +29,8 @@ This appendix supplements the main Game Design Document with production decision
 | Editor tooling | First-class project feature |
 | Save system | Versioned |
 | Primary platform | PC / Steam |
-| Input | Keyboard/mouse baseline; keep controller support feasible |
+| Camera & View | 3/4 isometric-inspired perspective diorama camera; direct camera-relative WASD control; contextual close-up workstation cameras. No first-person or over-the-shoulder gameplay. |
+| Input | Keyboard/mouse baseline (WASD + E/Q); keep controller support feasible |
 
 ## Imported Asset Philosophy
 Imported assets are a deliberate production advantage.
