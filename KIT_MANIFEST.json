@@ -1,0 +1,36 @@
+{
+  "project": "After Hours Café",
+  "project_owned_unity_root": "Assets/Mannan",
+  "generated_files": [
+    ".agents/rules/architecture.md",
+    ".agents/rules/asset-superpower.md",
+    ".agents/rules/editor-tools.md",
+    ".agents/rules/git-safety.md",
+    ".agents/rules/juice-presentation.md",
+    ".agents/rules/packages.md",
+    ".agents/rules/performance-pc.md",
+    ".agents/rules/prefab-data-authority.md",
+    ".agents/rules/testing-validation.md",
+    ".agents/rules/ui.md",
+    ".agents/rules/unity-coding.md",
+    ".agents/rules/unity-mcp.md",
+    ".agents/rules/workflow.md",
+    ".agents/skills/create-editor-tool/SKILL.md",
+    ".agents/skills/implement-unity-system/SKILL.md",
+    ".agents/skills/integrate-asset-feedback/SKILL.md",
+    "AGENTS.md",
+    "Docs/ANTIGRAVITY_FIRST_PROMPT.md",
+    "Docs/ARCHITECTURE.md",
+    "Docs/GDD_TECHNICAL_APPENDIX.md",
+    "README_SETUP.md"
+  ],
+  "notes": [
+    "Copy the kit contents to the Unity project root (same level as Assets, Packages, ProjectSettings).",
+    "Do not place .agents inside Assets.",
+    "Vendor assets remain in original locations; project-owned derivatives go under Assets/Mannan."
+  ],
+  "included_gdd_files": [
+    "Docs/AfterHoursCafe_GDD.docx",
+    "Docs/AfterHoursCafe_GDD.pdf"
+  ]
+}
