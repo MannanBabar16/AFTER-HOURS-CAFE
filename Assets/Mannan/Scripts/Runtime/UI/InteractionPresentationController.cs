@@ -55,6 +55,11 @@ namespace Mannan.UI
                 sensor.OnFocusChanged += HandleFocusChanged;
             }
 
+            if (inputReader != null)
+            {
+                inputReader.OnControlSchemeChanged += HandleControlSchemeChanged;
+            }
+
             WorkstationInteractable.OnWorkstationEnteredGlobal += HandleWorkstationEntered;
             WorkstationInteractable.OnWorkstationExitedGlobal += HandleWorkstationExited;
         }
@@ -64,6 +69,11 @@ namespace Mannan.UI
             if (sensor != null)
             {
                 sensor.OnFocusChanged -= HandleFocusChanged;
+            }
+
+            if (inputReader != null)
+            {
+                inputReader.OnControlSchemeChanged -= HandleControlSchemeChanged;
             }
 
             WorkstationInteractable.OnWorkstationEnteredGlobal -= HandleWorkstationEntered;
@@ -90,6 +100,11 @@ namespace Mannan.UI
                 sensor.OnFocusChanged -= HandleFocusChanged;
             }
 
+            if (inputReader != null)
+            {
+                inputReader.OnControlSchemeChanged -= HandleControlSchemeChanged;
+            }
+
             sensor = targetSensor;
             if (targetInputReader != null)
             {
@@ -103,6 +118,26 @@ namespace Mannan.UI
                 {
                     HandleFocusChanged(sensor.CurrentFocus);
                 }
+            }
+
+            if (inputReader != null && enabled)
+            {
+                inputReader.OnControlSchemeChanged += HandleControlSchemeChanged;
+            }
+        }
+
+        private void HandleControlSchemeChanged(ActiveControlScheme scheme)
+        {
+            if (!_isWorkstationActive && objectPrompt != null && _previousFocus != null)
+            {
+                string newBinding = inputReader != null ? inputReader.GetInteractBindingDisplayString() : (scheme == ActiveControlScheme.Gamepad ? "A" : "E");
+                objectPrompt.UpdateBindingKey(newBinding);
+            }
+
+            if (_isWorkstationActive && workstationHint != null)
+            {
+                string newCancelKey = inputReader != null ? inputReader.GetCancelBindingDisplayString() : (scheme == ActiveControlScheme.Gamepad ? "B" : "Q");
+                workstationHint.UpdateBindingKey(newCancelKey);
             }
         }
 

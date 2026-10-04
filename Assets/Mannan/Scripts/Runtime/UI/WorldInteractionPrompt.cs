@@ -84,6 +84,11 @@ namespace Mannan.UI
                 sensor.OnFocusChanged += HandleFocusChanged;
             }
 
+            if (inputReader != null)
+            {
+                inputReader.OnControlSchemeChanged += HandleControlSchemeChanged;
+            }
+
             WorkstationInteractable.OnWorkstationEnteredGlobal += HandleWorkstationEntered;
             WorkstationInteractable.OnWorkstationExitedGlobal += HandleWorkstationExited;
         }
@@ -95,11 +100,24 @@ namespace Mannan.UI
                 sensor.OnFocusChanged -= HandleFocusChanged;
             }
 
+            if (inputReader != null)
+            {
+                inputReader.OnControlSchemeChanged -= HandleControlSchemeChanged;
+            }
+
             WorkstationInteractable.OnWorkstationEnteredGlobal -= HandleWorkstationEntered;
             WorkstationInteractable.OnWorkstationExitedGlobal -= HandleWorkstationExited;
 
             _animSequence?.Kill();
             _glideTween?.Kill();
+        }
+
+        private void HandleControlSchemeChanged(Mannan.Player.ActiveControlScheme scheme)
+        {
+            if (!_isWorkstationActive && _currentFocus != null)
+            {
+                UpdateLabels();
+            }
         }
 
         private void LateUpdate()

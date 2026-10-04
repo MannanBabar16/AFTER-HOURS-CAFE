@@ -17,12 +17,18 @@ namespace Mannan.Player
         [Tooltip("Authored InputActionAsset. If left null, a programmatic fallback map with default bindings is generated.")]
         [SerializeField] private InputActionAsset actionsAsset;
 
+        [Tooltip("Tracker component managing active control scheme. Auto-assigned if null.")]
+        [SerializeField] private ActiveControlSchemeTracker schemeTracker;
+
         public Vector2 MoveInput { get; private set; }
         public bool InteractTriggered { get; private set; }
         public bool CancelTriggered { get; private set; }
 
+        public ActiveControlScheme CurrentControlScheme => schemeTracker != null ? schemeTracker.CurrentControlScheme : ActiveControlScheme.KeyboardMouse;
+
         public event System.Action OnInteractPressed;
         public event System.Action OnCancelPressed;
+        public event System.Action<ActiveControlScheme> OnControlSchemeChanged;
 
         public InputActionAsset ActionsAsset => actionsAsset;
 
@@ -34,11 +40,25 @@ namespace Mannan.Player
 
         private void Awake()
         {
+            if (schemeTracker == null)
+            {
+                schemeTracker = GetComponent<ActiveControlSchemeTracker>();
+                if (schemeTracker == null)
+                {
+                    schemeTracker = gameObject.AddComponent<ActiveControlSchemeTracker>();
+                }
+            }
+
             InitializeActions();
         }
 
         private void OnEnable()
         {
+            if (schemeTracker != null)
+            {
+                schemeTracker.OnControlSchemeChanged += HandleSchemeChanged;
+            }
+
             if (_actionMap == null)
             {
                 InitializeActions();
@@ -49,7 +69,17 @@ namespace Mannan.Player
 
         private void OnDisable()
         {
+            if (schemeTracker != null)
+            {
+                schemeTracker.OnControlSchemeChanged -= HandleSchemeChanged;
+            }
+
             _actionMap?.Disable();
+        }
+
+        private void HandleSchemeChanged(ActiveControlScheme newScheme)
+        {
+            OnControlSchemeChanged?.Invoke(newScheme);
         }
 
         private void OnDestroy()
@@ -99,25 +129,25 @@ namespace Mannan.Player
             _moveAction = _actionMap.AddAction("Move", InputActionType.Value);
             _moveAction.expectedControlType = "Vector2";
             _moveAction.AddCompositeBinding("2DVector")
-                .With("Up", "<Keyboard>/w")
-                .With("Down", "<Keyboard>/s")
-                .With("Left", "<Keyboard>/a")
-                .With("Right", "<Keyboard>/d");
+                .With("Up", "<Keyboard>/w", groups: "Keyboard&Mouse")
+                .With("Down", "<Keyboard>/s", groups: "Keyboard&Mouse")
+                .With("Left", "<Keyboard>/a", groups: "Keyboard&Mouse")
+                .With("Right", "<Keyboard>/d", groups: "Keyboard&Mouse");
             _moveAction.AddCompositeBinding("2DVector")
-                .With("Up", "<Keyboard>/upArrow")
-                .With("Down", "<Keyboard>/downArrow")
-                .With("Left", "<Keyboard>/leftArrow")
-                .With("Right", "<Keyboard>/rightArrow");
-            _moveAction.AddBinding("<Gamepad>/leftStick");
+                .With("Up", "<Keyboard>/upArrow", groups: "Keyboard&Mouse")
+                .With("Down", "<Keyboard>/downArrow", groups: "Keyboard&Mouse")
+                .With("Left", "<Keyboard>/leftArrow", groups: "Keyboard&Mouse")
+                .With("Right", "<Keyboard>/rightArrow", groups: "Keyboard&Mouse");
+            _moveAction.AddBinding("<Gamepad>/leftStick", groups: "Gamepad");
 
             _interactAction = _actionMap.AddAction("Interact", InputActionType.Button);
-            _interactAction.AddBinding("<Keyboard>/e");
-            _interactAction.AddBinding("<Gamepad>/buttonSouth");
+            _interactAction.AddBinding("<Keyboard>/e", groups: "Keyboard&Mouse");
+            _interactAction.AddBinding("<Gamepad>/buttonSouth", groups: "Gamepad");
 
             _cancelAction = _actionMap.AddAction("Cancel", InputActionType.Button);
-            _cancelAction.AddBinding("<Keyboard>/q");
-            _cancelAction.AddBinding("<Keyboard>/escape");
-            _cancelAction.AddBinding("<Gamepad>/buttonEast");
+            _cancelAction.AddBinding("<Keyboard>/q", groups: "Keyboard&Mouse");
+            _cancelAction.AddBinding("<Keyboard>/escape", groups: "Keyboard&Mouse");
+            _cancelAction.AddBinding("<Gamepad>/buttonEast", groups: "Gamepad");
         }
 
         private void BindActionCallbacks()
@@ -148,12 +178,24 @@ namespace Mannan.Player
 
         private void HandleInteractPerformed(InputAction.CallbackContext context)
         {
+            if (context.control != null)
+            {
+                if (context.control.device is Gamepad) schemeTracker?.NotifyDeviceUsed(ActiveControlScheme.Gamepad);
+                else if (context.control.device is Keyboard || context.control.device is Mouse) schemeTracker?.NotifyDeviceUsed(ActiveControlScheme.KeyboardMouse);
+            }
+
             InteractTriggered = true;
             OnInteractPressed?.Invoke();
         }
 
         private void HandleCancelPerformed(InputAction.CallbackContext context)
         {
+            if (context.control != null)
+            {
+                if (context.control.device is Gamepad) schemeTracker?.NotifyDeviceUsed(ActiveControlScheme.Gamepad);
+                else if (context.control.device is Keyboard || context.control.device is Mouse) schemeTracker?.NotifyDeviceUsed(ActiveControlScheme.KeyboardMouse);
+            }
+
             CancelTriggered = true;
             OnCancelPressed?.Invoke();
         }
@@ -170,6 +212,12 @@ namespace Mannan.Player
                 if (MoveInput.sqrMagnitude > 1f)
                 {
                     MoveInput = MoveInput.normalized;
+                }
+
+                if (MoveInput.sqrMagnitude > 0.04f && _moveAction.activeControl != null)
+                {
+                    if (_moveAction.activeControl.device is Gamepad) schemeTracker?.NotifyDeviceUsed(ActiveControlScheme.Gamepad);
+                    else if (_moveAction.activeControl.device is Keyboard) schemeTracker?.NotifyDeviceUsed(ActiveControlScheme.KeyboardMouse);
                 }
             }
             else
@@ -199,35 +247,51 @@ namespace Mannan.Player
         }
 
         /// <summary>
-        /// Returns the active binding display string for the Interact action (e.g. "E", "A").
+        /// Returns the active binding display string for the Interact action for the currently active control scheme.
         /// </summary>
         public string GetInteractBindingDisplayString()
         {
-            if (_interactAction != null)
-            {
-                string display = _interactAction.GetBindingDisplayString();
-                if (!string.IsNullOrEmpty(display))
-                {
-                    return display;
-                }
-            }
-            return "E";
+            return GetInteractBindingDisplayString(CurrentControlScheme);
         }
 
         /// <summary>
-        /// Returns the active binding display string for the Cancel action (e.g. "Q", "B").
+        /// Returns the binding display string for the Interact action for a specific control scheme.
         /// </summary>
-        public string GetCancelBindingDisplayString()
+        public string GetInteractBindingDisplayString(ActiveControlScheme scheme)
         {
-            if (_cancelAction != null)
+            if (_interactAction != null)
             {
-                string display = _cancelAction.GetBindingDisplayString();
+                string display = ActiveControlSchemeTracker.GetBindingDisplayForScheme(_interactAction, scheme);
                 if (!string.IsNullOrEmpty(display))
                 {
                     return display;
                 }
             }
-            return "Q";
+            return scheme == ActiveControlScheme.Gamepad ? "A" : "E";
+        }
+
+        /// <summary>
+        /// Returns the active binding display string for the Cancel action for the currently active control scheme.
+        /// </summary>
+        public string GetCancelBindingDisplayString()
+        {
+            return GetCancelBindingDisplayString(CurrentControlScheme);
+        }
+
+        /// <summary>
+        /// Returns the binding display string for the Cancel action for a specific control scheme.
+        /// </summary>
+        public string GetCancelBindingDisplayString(ActiveControlScheme scheme)
+        {
+            if (_cancelAction != null)
+            {
+                string display = ActiveControlSchemeTracker.GetBindingDisplayForScheme(_cancelAction, scheme);
+                if (!string.IsNullOrEmpty(display))
+                {
+                    return display;
+                }
+            }
+            return scheme == ActiveControlScheme.Gamepad ? "B" : "Q";
         }
     }
 }

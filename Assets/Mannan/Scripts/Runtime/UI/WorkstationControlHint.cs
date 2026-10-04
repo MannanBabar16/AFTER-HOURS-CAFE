@@ -71,13 +71,21 @@ namespace Mannan.UI
             _isShowing = false;
         }
 
-        public void Show(string cancelBindingKey = "Q", string actionDescription = "Back")
+        /// <summary>
+        /// Updates the keycap badge text in place without retriggering slide animations.
+        /// </summary>
+        public void UpdateBindingKey(string cancelBindingKey)
         {
             if (keyBadgeLabel != null)
             {
                 string key = string.IsNullOrEmpty(cancelBindingKey) ? "Q" : cancelBindingKey;
                 keyBadgeLabel.text = $"[ {key} ]";
             }
+        }
+
+        public void Show(string cancelBindingKey = "Q", string actionDescription = "Back")
+        {
+            UpdateBindingKey(cancelBindingKey);
 
             if (actionLabel != null)
             {

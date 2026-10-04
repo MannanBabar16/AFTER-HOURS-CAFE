@@ -228,15 +228,23 @@ namespace Mannan.UI
         {
             if (_currentFocus == null) return;
 
-            string key = string.IsNullOrEmpty(bindingKey) ? "E" : bindingKey;
-            if (keyBadgeLabel != null)
-            {
-                keyBadgeLabel.text = $"[ {key} ]";
-            }
+            UpdateBindingKey(bindingKey);
 
             if (actionTextLabel != null)
             {
                 actionTextLabel.text = $"{_currentFocus.ActionName} {_currentFocus.PromptText}";
+            }
+        }
+
+        /// <summary>
+        /// Updates the keycap badge text in place without retriggering entrance animations.
+        /// </summary>
+        public void UpdateBindingKey(string bindingKey)
+        {
+            string key = string.IsNullOrEmpty(bindingKey) ? "E" : bindingKey;
+            if (keyBadgeLabel != null)
+            {
+                keyBadgeLabel.text = $"[ {key} ]";
             }
         }
 

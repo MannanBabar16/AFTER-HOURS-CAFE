@@ -109,11 +109,61 @@ namespace Mannan.Tests.EditMode
             Assert.IsFalse(reader.ConsumeInteractTriggered());
             Assert.IsFalse(reader.ConsumeCancelTriggered());
 
-            // Default binding string should return readable string
-            Assert.IsNotEmpty(reader.GetInteractBindingDisplayString());
-            Assert.IsNotEmpty(reader.GetCancelBindingDisplayString());
+            // Default binding string should return scheme-specific string without mixing devices
+            Assert.AreEqual("E", reader.GetInteractBindingDisplayString(ActiveControlScheme.KeyboardMouse));
+            Assert.AreEqual("Q", reader.GetCancelBindingDisplayString(ActiveControlScheme.KeyboardMouse));
+            Assert.AreEqual("A", reader.GetInteractBindingDisplayString(ActiveControlScheme.Gamepad));
+            Assert.AreEqual("B", reader.GetCancelBindingDisplayString(ActiveControlScheme.Gamepad));
 
             Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void ActiveControlSchemeTracker_DefaultsToKeyboard_AndNotifiesOnSwitch()
+        {
+            var go = new GameObject("TestSchemeTracker");
+            var tracker = go.AddComponent<ActiveControlSchemeTracker>();
+
+            Assert.AreEqual(ActiveControlScheme.KeyboardMouse, tracker.CurrentControlScheme);
+
+            int callbackCount = 0;
+            ActiveControlScheme reportedScheme = ActiveControlScheme.KeyboardMouse;
+            tracker.OnControlSchemeChanged += s =>
+            {
+                callbackCount++;
+                reportedScheme = s;
+            };
+
+            // Switching to Gamepad notifies
+            tracker.SetControlScheme(ActiveControlScheme.Gamepad);
+            Assert.AreEqual(ActiveControlScheme.Gamepad, tracker.CurrentControlScheme);
+            Assert.AreEqual(1, callbackCount);
+            Assert.AreEqual(ActiveControlScheme.Gamepad, reportedScheme);
+
+            // Redundant switch to Gamepad does NOT notify (no flickering)
+            tracker.SetControlScheme(ActiveControlScheme.Gamepad);
+            Assert.AreEqual(1, callbackCount);
+
+            // Switching back to KeyboardMouse notifies
+            tracker.SetControlScheme(ActiveControlScheme.KeyboardMouse);
+            Assert.AreEqual(ActiveControlScheme.KeyboardMouse, tracker.CurrentControlScheme);
+            Assert.AreEqual(2, callbackCount);
+
+            Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void ActiveControlSchemeTracker_FormatBindingDisplay_SanitizesStandardNames()
+        {
+            Assert.AreEqual("A", ActiveControlSchemeTracker.FormatBindingDisplay("Button South"));
+            Assert.AreEqual("B", ActiveControlSchemeTracker.FormatBindingDisplay("Button East"));
+            Assert.AreEqual("X", ActiveControlSchemeTracker.FormatBindingDisplay("Button West"));
+            Assert.AreEqual("Y", ActiveControlSchemeTracker.FormatBindingDisplay("Button North"));
+            Assert.AreEqual("LB", ActiveControlSchemeTracker.FormatBindingDisplay("Left Shoulder"));
+            Assert.AreEqual("RB", ActiveControlSchemeTracker.FormatBindingDisplay("Right Shoulder"));
+            Assert.AreEqual("Esc", ActiveControlSchemeTracker.FormatBindingDisplay("Escape"));
+            Assert.AreEqual("E", ActiveControlSchemeTracker.FormatBindingDisplay("E"));
+            Assert.AreEqual("Q", ActiveControlSchemeTracker.FormatBindingDisplay("Q"));
         }
 
         [Test]

@@ -141,7 +141,9 @@ namespace Mannan.Editor.Tools
             charController.stepOffset = 0.3f;
             charController.skinWidth = 0.06f;
 
+            var schemeTracker = playerGo.AddComponent<ActiveControlSchemeTracker>();
             var inputReader = playerGo.AddComponent<PlayerInputReader>();
+            SetField(inputReader, "schemeTracker", schemeTracker);
             var actionsAsset = AssetDatabase.LoadAssetAtPath<InputActionAsset>("Assets/Mannan/Settings/PlayerInputActions.inputactions");
             if (actionsAsset != null)
             {
